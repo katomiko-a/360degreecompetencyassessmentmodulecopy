@@ -29,6 +29,21 @@
 - **React Hook Form** - управление формами
 - **Sonner** - уведомления
 
+## Поддерживаемые IDE
+
+Проект полностью совместим с:
+
+### Visual Studio Code (Рекомендуется)
+- Легкий и быстрый редактор
+- Отличная поддержка React/TypeScript
+- См. `INSTALLATION_GUIDE.md`
+
+### Visual Studio 2019/2022
+- Полноценная IDE от Microsoft
+- Поддержка через Node.js Tools
+- См. `VISUAL_STUDIO_GUIDE.md`
+- Файлы проекта: `.sln` и `.njsproj` включены
+
 ## Установка и запуск
 
 ### Предварительные требования

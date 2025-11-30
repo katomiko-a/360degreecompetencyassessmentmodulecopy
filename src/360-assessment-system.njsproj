@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">14.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    <Name>360-assessment-system</Name>
+    <RootNamespace>360-assessment-system</RootNamespace>
+    <SaveNodeJsSettingsInProjectFile>True</SaveNodeJsSettingsInProjectFile>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>8b9f4f8d-9e3c-4f0a-9b5a-3d8c7e6f5a4b</ProjectGuid>
+    <ProjectHome>.</ProjectHome>
+    <StartupFile>
+    </StartupFile>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <ProjectTypeGuids>{3AF33F2E-1736-4565-8C3A-E88EAF3E4DFF}</ProjectTypeGuids>
+    <EnableTypeScript>true</EnableTypeScript>
+    <StartWebBrowser>True</StartWebBrowser>
+    <ScriptArguments>run dev</ScriptArguments>
+    <NodeExePath>npm</NodeExePath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Root files -->
+    <Content Include="package.json" />
+    <Content Include="tsconfig.json" />
+    <Content Include="vite.config.ts" />
+    <Content Include="index.html" />
+    <Content Include=".gitignore" />
+    <Content Include="README.md" />
+    <Content Include="INSTALLATION_GUIDE.md" />
+    <Content Include="EXPORT_INSTRUCTIONS.md" />
+    
+    <!-- VS Code settings -->
+    <Content Include=".vscode\extensions.json" />
+    <Content Include=".vscode\settings.json" />
+    
+    <!-- Main source files -->
+    <Content Include="src\main.tsx" />
+    <Content Include="App.tsx" />
+    
+    <!-- Components -->
+    <Content Include="components\Dashboard.tsx" />
+    <Content Include="components\CampaignWizard.tsx" />
+    <Content Include="components\TakeAssessment.tsx" />
+    <Content Include="components\AssessmentResults.tsx" />
+    <Content Include="components\CreateAssessment.tsx" />
+    <Content Include="components\ParticipantsManagement.tsx" />
+    <Content Include="components\SurveyManagement.tsx" />
+    <Content Include="components\NotificationsManagement.tsx" />
+    <Content Include="components\AssessmentForm.tsx" />
+    <Content Include="components\DetailedReports.tsx" />
+    <Content Include="components\UserProfile.tsx" />
+    <Content Include="components\Settings.tsx" />
+    <Content Include="components\Navigation.tsx" />
+    
+    <!-- UI Components -->
+    <Content Include="components\ui\accordion.tsx" />
+    <Content Include="components\ui\alert-dialog.tsx" />
+    <Content Include="components\ui\alert.tsx" />
+    <Content Include="components\ui\aspect-ratio.tsx" />
+    <Content Include="components\ui\avatar.tsx" />
+    <Content Include="components\ui\badge.tsx" />
+    <Content Include="components\ui\breadcrumb.tsx" />
+    <Content Include="components\ui\button.tsx" />
+    <Content Include="components\ui\calendar.tsx" />
+    <Content Include="components\ui\card.tsx" />
+    <Content Include="components\ui\carousel.tsx" />
+    <Content Include="components\ui\chart.tsx" />
+    <Content Include="components\ui\checkbox.tsx" />
+    <Content Include="components\ui\collapsible.tsx" />
+    <Content Include="components\ui\command.tsx" />
+    <Content Include="components\ui\context-menu.tsx" />
+    <Content Include="components\ui\dialog.tsx" />
+    <Content Include="components\ui\drawer.tsx" />
+    <Content Include="components\ui\dropdown-menu.tsx" />
+    <Content Include="components\ui\form.tsx" />
+    <Content Include="components\ui\hover-card.tsx" />
+    <Content Include="components\ui\input-otp.tsx" />
+    <Content Include="components\ui\input.tsx" />
+    <Content Include="components\ui\label.tsx" />
+    <Content Include="components\ui\menubar.tsx" />
+    <Content Include="components\ui\navigation-menu.tsx" />
+    <Content Include="components\ui\pagination.tsx" />
+    <Content Include="components\ui\popover.tsx" />
+    <Content Include="components\ui\progress.tsx" />
+    <Content Include="components\ui\radio-group.tsx" />
+    <Content Include="components\ui\resizable.tsx" />
+    <Content Include="components\ui\scroll-area.tsx" />
+    <Content Include="components\ui\select.tsx" />
+    <Content Include="components\ui\separator.tsx" />
+    <Content Include="components\ui\sheet.tsx" />
+    <Content Include="components\ui\sidebar.tsx" />
+    <Content Include="components\ui\skeleton.tsx" />
+    <Content Include="components\ui\slider.tsx" />
+    <Content Include="components\ui\sonner.tsx" />
+    <Content Include="components\ui\switch.tsx" />
+    <Content Include="components\ui\table.tsx" />
+    <Content Include="components\ui\tabs.tsx" />
+    <Content Include="components\ui\textarea.tsx" />
+    <Content Include="components\ui\toggle-group.tsx" />
+    <Content Include="components\ui\toggle.tsx" />
+    <Content Include="components\ui\tooltip.tsx" />
+    <Content Include="components\ui\use-mobile.ts" />
+    <Content Include="components\ui\utils.ts" />
+    
+    <!-- Figma Components -->
+    <Content Include="components\figma\ImageWithFallback.tsx" />
+    
+    <!-- Styles -->
+    <Content Include="styles\globals.css" />
+    
+    <!-- Guidelines -->
+    <Content Include="guidelines\Guidelines.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="src\" />
+    <Folder Include="components\" />
+    <Folder Include="components\ui\" />
+    <Folder Include="components\figma\" />
+    <Folder Include="styles\" />
+    <Folder Include="guidelines\" />
+    <Folder Include=".vscode\" />
+  </ItemGroup>
+  <Import Project="$(VSToolsPath)\Node.js Tools\Microsoft.NodejsToolsV2.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>False</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>5173</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost:5173/</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}" User="">
+        <WebProjectProperties>
+          <StartPageUrl>
+          </StartPageUrl>
+          <StartAction>CurrentPage</StartAction>
+          <AspNetDebugging>True</AspNetDebugging>
+          <SilverlightDebugging>False</SilverlightDebugging>
+          <NativeDebugging>False</NativeDebugging>
+          <SQLDebugging>False</SQLDebugging>
+          <ExternalProgram>
+          </ExternalProgram>
+          <StartExternalURL>
+          </StartExternalURL>
+          <StartCmdLineArguments>
+          </StartCmdLineArguments>
+          <StartWorkingDirectory>
+          </StartWorkingDirectory>
+          <EnableENC>False</EnableENC>
+          <AlwaysStartWebServerOnDebug>False</AlwaysStartWebServerOnDebug>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>
