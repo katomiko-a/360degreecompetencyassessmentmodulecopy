@@ -1,5 +1,27 @@
-import React, { useState } from 'react';
-import { Mail, Send, Eye, Save, Copy, Bell, Clock, Users, CheckCircle, AlertCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import { Textarea } from './ui/textarea';
+import { Badge } from './ui/badge';
+import { 
+  Bell, 
+  Send, 
+  Clock, 
+  CheckCircle, 
+  Mail, 
+  Users,
+  Settings,
+  Search,
+  Loader2,
+  AlertCircle,
+  Key,
+  Eye,
+  Save
+} from 'lucide-react';
+import * as api from '../utils/api';
+import { ResendApiKeySetup } from './ResendApiKeySetup';
 
 interface EmailTemplate {
   id: string;
@@ -7,6 +29,14 @@ interface EmailTemplate {
   subject: string;
   body: string;
   type: 'invitation' | 'reminder' | 'completion' | 'results';
+}
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  department: string;
 }
 
 const defaultTemplates: EmailTemplate[] = [
@@ -95,6 +125,20 @@ export function NotificationsManagement() {
   const [editedTemplate, setEditedTemplate] = useState<EmailTemplate>(defaultTemplates[0]);
   const [isEditing, setIsEditing] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [showApiKeySetup, setShowApiKeySetup] = useState(false);
+  
+  // Состояние для тестовой отправки
+  const [testEmail, setTestEmail] = useState('');
+  const [sendingTest, setSendingTest] = useState(false);
+  const [testSent, setTestSent] = useState(false);
+  
+  // Состояние для выбора получателей
+  const [users, setUsers] = useState<User[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [sendingBulk, setSendingBulk] = useState(false);
+  const [bulkSent, setBulkSent] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   
   const [settings, setSettings] = useState({
     autoSendInvitations: true,
@@ -110,6 +154,23 @@ export function NotificationsManagement() {
     invitationTime: '09:00',
     reminderTime: '10:00'
   });
+
+  // Загрузка пользователей при монтировании
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  const loadUsers = async () => {
+    try {
+      setLoadingUsers(true);
+      const { users: fetchedUsers } = await api.getUsers();
+      setUsers(fetchedUsers);
+    } catch (error) {
+      console.error('Ошибка при загрузке пользователей:', error);
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
 
   const handleTemplateSelect = (template: EmailTemplate) => {
     setSelectedTemplate(template);
@@ -127,6 +188,142 @@ export function NotificationsManagement() {
     const original = defaultTemplates.find(t => t.id === selectedTemplate.id);
     if (original) {
       setEditedTemplate(original);
+    }
+  };
+
+  const handleSendTest = async () => {
+    if (!testEmail) {
+      alert('Пожалуйста, введите email для отправки теста');
+      return;
+    }
+
+    try {
+      setSendingTest(true);
+      setTestSent(false);
+      
+      console.log('Начинаем отправку тестового письма на:', testEmail);
+      console.log('Используемый шаблон:', { subject: editedTemplate.subject, bodyLength: editedTemplate.body.length });
+      
+      // Вызываем реальный API для отправки тестового письма
+      const result = await api.sendTestEmail({ 
+        email: testEmail, 
+        template: {
+          subject: editedTemplate.subject,
+          body: editedTemplate.body
+        }
+      });
+      
+      console.log('Результат отправки тестового письма:', result);
+      
+      setTestSent(true);
+      setTimeout(() => setTestSent(false), 3000);
+      
+      alert(`✅ Письмо успешно отправлено на ${testEmail}!\n\nПроверьте свою почту (включая папку спам).`);
+      
+    } catch (error) {
+      console.error('Детальная ошибка при отправке тестового письма:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка';
+      
+      // Показываем детальную ошибку с инструкциями
+      if (errorMessage.includes('API ключ Resend невалидный') || errorMessage.includes('API key is invalid')) {
+        alert(
+          '❌ API ключ Resend невалидный\n\n' +
+          'Resend отклонил API ключ. Возможные причины:\n\n' +
+          '1. Ключ был удален или деактивирован в панели Resend\n' +
+          '2. Ключ скопирован неполностью\n' +
+          '3. Ключ содержит опечатку или пробелы\n' +
+          '4. Ключ еще не активирован (подождите 1-2 минуты)\n\n' +
+          '📋 РЕШЕНИЕ:\n' +
+          '1. Перейдите на https://resend.com/api-keys\n' +
+          '2. Создайте НОВЫЙ API ключ\n' +
+          '3. Скопируйте его БЕЗ пробелов\n' +
+          '4. Нажмите кнопку "Добавить API ключ Resend" выше\n' +
+          '5. Вставьте новый ключ и сохраните'
+        );
+        // Автоматически открываем модальное окно настройки
+        setShowApiKeySetup(true);
+      } else if (errorMessage.includes('Невалидный формат')) {
+        alert(
+          '❌ Невалидный формат API ключа\n\n' +
+          'API ключ Resend должен:\n' +
+          '• Начинаться с "re_"\n' +
+          '• Содержать только буквы, цифры, _ и -\n' +
+          '• Быть длиной 40+ символов\n\n' +
+          'Пожалуйста, проверьте ключ в настройках.'
+        );
+        setShowApiKeySetup(true);
+      } else if (errorMessage.includes('не настроен')) {
+        alert(
+          '⚙️ Email сервис не настроен\n\n' +
+          'API ключ Resend отсутствует.\n\n' +
+          'Нажмите кнопку "Добавить API ключ Resend" выше,\n' +
+          'чтобы настроить интеграцию.'
+        );
+        setShowApiKeySetup(true);
+      } else {
+        alert(`❌ Ошибка при отправке письма:\n\n${errorMessage}\n\nПроверьте консоль браузера (F12) для получения подробностей.`);
+      }
+    } finally {
+      setSendingTest(false);
+    }
+  };
+
+  const handleToggleUser = (userId: string) => {
+    if (selectedUsers.includes(userId)) {
+      setSelectedUsers(selectedUsers.filter(id => id !== userId));
+    } else {
+      setSelectedUsers([...selectedUsers, userId]);
+    }
+  };
+
+  const handleSelectAll = () => {
+    const filteredUserIds = filteredUsers.map(u => u.id);
+    if (selectedUsers.length === filteredUserIds.length) {
+      setSelectedUsers([]);
+    } else {
+      setSelectedUsers(filteredUserIds);
+    }
+  };
+
+  const handleSendBulk = async () => {
+    if (selectedUsers.length === 0) {
+      alert('Пожалуйста, выберите хотя бы одного получателя');
+      return;
+    }
+
+    try {
+      setSendingBulk(true);
+      setBulkSent(false);
+      
+      // Вызываем реальный API для отправки массовых писем
+      const result = await api.sendBulkEmail({ 
+        userIds: selectedUsers, 
+        template: {
+          subject: editedTemplate.subject,
+          body: editedTemplate.body
+        }
+      });
+      
+      setBulkSent(true);
+      setTimeout(() => setBulkSent(false), 3000);
+      
+      console.log('Массовая отправка выполнена:', result);
+      
+      if (result.errors && result.errors.length > 0) {
+        alert(`Письма отправлены: ${result.results.length} из ${selectedUsers.length}\n\nОшибки: ${result.errors.length}`);
+      } else {
+        alert(`Все письма успешно отправлены! (${result.results.length})`);
+      }
+      
+      // Сбрасываем выбор
+      setSelectedUsers([]);
+      
+    } catch (error) {
+      console.error('Ошибка при массовой отправке:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка';
+      alert(`Ошибка при массовой отправке: ${errorMessage}`);
+    } finally {
+      setSendingBulk(false);
     }
   };
 
@@ -150,6 +347,13 @@ export function NotificationsManagement() {
     return preview;
   };
 
+  // Фильтрация пользователей по поиску
+  const filteredUsers = users.filter(user => 
+    user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    user.department.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="space-y-6">
       {/* Шапка */}
@@ -158,6 +362,40 @@ export function NotificationsManagement() {
         <p className="text-gray-600">
           Настройте автоматические уведомления и шаблоны писем для участников
         </p>
+      </div>
+
+      {/* Alert с инструкциями по настройке Resend API */}
+      <div className="bg-amber-50 border-2 border-amber-200 rounded-xl p-6">
+        <div className="flex items-start gap-4">
+          <div className="flex-shrink-0">
+            <Key className="w-8 h-8 text-amber-600" />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-amber-900 mb-2 flex items-center gap-2">
+              ⚙️ Настройка Email-отправки
+            </h3>
+            <p className="text-amber-800 text-sm mb-4">
+              Для отправки писем необходимо настроить интеграцию с Resend API. 
+              Это бесплатный сервис для отправки email (100 писем/день).
+            </p>
+            <div className="bg-white border border-amber-200 rounded-lg p-4 mb-4">
+              <h4 className="text-amber-900 mb-2">📋 Быстрая инструкция:</h4>
+              <ol className="space-y-1 text-sm text-amber-800">
+                <li>1. Зарегистрируйтесь на <a href="https://resend.com/signup" target="_blank" rel="noopener noreferrer" className="text-purple-600 hover:text-purple-700 underline">resend.com/signup</a></li>
+                <li>2. Перейдите в "API Keys" → "Create API Key"</li>
+                <li>3. Скопируйте созданный ключ (начинается с <code className="bg-amber-100 px-1 rounded">re_</code>)</li>
+                <li>4. Нажмите кнопку "Добавить API ключ" ниже и вставьте ключ</li>
+              </ol>
+            </div>
+            <button
+              onClick={() => setShowApiKeySetup(true)}
+              className="flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+            >
+              <Key className="w-4 h-4" />
+              Добавить API ключ Resend
+            </button>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-12 gap-6">
@@ -531,12 +769,87 @@ export function NotificationsManagement() {
               <input
                 type="email"
                 placeholder="your.email@company.com"
+                value={testEmail}
+                onChange={(e) => setTestEmail(e.target.value)}
                 className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
-              <button className="px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors">
-                Отправить тест
+              <button
+                onClick={handleSendTest}
+                className="px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors"
+                disabled={sendingTest}
+              >
+                {sendingTest ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Отправить тест'}
               </button>
             </div>
+            {testSent && (
+              <div className="mt-2 text-green-600 text-sm">
+                Тестовое письмо успешно отправлено!
+              </div>
+            )}
+          </div>
+
+          {/* Массовая отправка */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Send className="w-5 h-5 text-purple-600" />
+              <h2 className="text-gray-900">Массовая отправка</h2>
+            </div>
+            <p className="text-gray-600 text-sm mb-4">
+              Выберите получателей и отправьте письмо
+            </p>
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="Поиск по имени, email или отделу"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+                <button
+                  onClick={handleSelectAll}
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+                >
+                  {selectedUsers.length === filteredUsers.length ? 'Отменить выбор' : 'Выбрать всех'}
+                </button>
+              </div>
+              <div className="h-40 overflow-y-auto border border-gray-300 rounded-lg">
+                {loadingUsers ? (
+                  <div className="flex items-center justify-center h-full">
+                    <Loader2 className="w-4 h-4 animate-spin text-gray-500" />
+                  </div>
+                ) : (
+                  <ul className="divide-y divide-gray-200">
+                    {filteredUsers.map(user => (
+                      <li key={user.id} className="flex items-center px-4 py-2">
+                        <input
+                          type="checkbox"
+                          checked={selectedUsers.includes(user.id)}
+                          onChange={() => handleToggleUser(user.id)}
+                          className="w-4 h-4 text-purple-600 rounded focus:ring-2 focus:ring-purple-500 mt-0.5"
+                        />
+                        <div className="ml-3">
+                          <div className="text-gray-900">{user.name}</div>
+                          <div className="text-gray-500 text-sm">{user.email}</div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              <button
+                onClick={handleSendBulk}
+                className="px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors"
+                disabled={sendingBulk}
+              >
+                {sendingBulk ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Отправить'}
+              </button>
+            </div>
+            {bulkSent && (
+              <div className="mt-2 text-green-600 text-sm">
+                Письма успешно отправлены!
+              </div>
+            )}
           </div>
 
           {/* Статистика */}
@@ -581,6 +894,11 @@ export function NotificationsManagement() {
           </button>
         </div>
       </div>
+
+      {/* Модальное окно настройки API ключа */}
+      {showApiKeySetup && (
+        <ResendApiKeySetup onClose={() => setShowApiKeySetup(false)} />
+      )}
     </div>
   );
 }

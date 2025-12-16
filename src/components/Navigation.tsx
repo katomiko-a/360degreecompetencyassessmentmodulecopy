@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, FileText, Target, Settings, User, Users, ClipboardList, Bell } from 'lucide-react';
+import { Home, FileText, Target, Settings, User, Users, ClipboardList, Bell, LogOut } from 'lucide-react';
 import type { View, UserRole } from '../App';
 
 interface NavigationProps {
@@ -7,9 +7,11 @@ interface NavigationProps {
   onNavigate: (view: View) => void;
   userRole: UserRole;
   onRoleChange: (role: UserRole) => void;
+  onLogout?: () => void;
+  userName?: string;
 }
 
-export function Navigation({ currentView, onNavigate, userRole, onRoleChange }: NavigationProps) {
+export function Navigation({ currentView, onNavigate, userRole, onRoleChange, onLogout, userName }: NavigationProps) {
   return (
     <nav className="bg-white border-b border-gray-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-4">
@@ -101,10 +103,20 @@ export function Navigation({ currentView, onNavigate, userRole, onRoleChange }: 
                   currentView === 'profile'
                     ? 'text-purple-600 font-medium'
                     : 'text-gray-900'
-                }`}>Ирина Петрова</div>
-                <div className="text-gray-500 text-xs">Senior PM</div>
+                }`}>{userName || 'Пользователь'}</div>
+                <div className="text-gray-500 text-xs">{userRole === 'admin' ? 'Администратор' : 'Сотрудник'}</div>
               </div>
             </button>
+            
+            {onLogout && (
+              <button
+                onClick={onLogout}
+                className="p-2.5 rounded-lg transition-all text-gray-600 hover:text-red-600 hover:bg-red-50"
+                title="Выйти"
+              >
+                <LogOut className="w-5 h-5" />
+              </button>
+            )}
           </div>
         </div>
       </div>

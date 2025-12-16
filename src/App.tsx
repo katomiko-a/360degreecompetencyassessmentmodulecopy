@@ -12,6 +12,10 @@ import { AssessmentForm } from "./components/AssessmentForm";
 import { DetailedReports } from "./components/DetailedReports";
 import { UserProfile } from "./components/UserProfile";
 import { Settings } from "./components/Settings";
+import { Login } from "./components/Login";
+import { Signup } from "./components/Signup";
+import { useAuth } from "./hooks/useAuth";
+import { Loader2 } from "lucide-react";
 
 export type View =
   | "dashboard"
@@ -51,7 +55,9 @@ export default function App() {
     useState<View>("dashboard");
   const [selectedAssessment, setSelectedAssessment] =
     useState<Assessment | null>(null);
-  const [userRole, setUserRole] = useState<UserRole>("admin");
+  const [authView, setAuthView] = useState<'login' | 'signup'>('login');
+  
+  const { user, loading, error, signIn, signOut, isAuthenticated } = useAuth();
 
   const handleViewChange = (
     view: View,
@@ -63,13 +69,44 @@ export default function App() {
     }
   };
 
+  // Показываем загрузку во время проверки сессии
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto text-purple-600" />
+          <p className="mt-4 text-gray-600">Загрузка...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Показываем форму входа/регистрации если не авторизован
+  if (!isAuthenticated) {
+    if (authView === 'signup') {
+      return <Signup onSwitchToLogin={() => setAuthView('login')} />;
+    }
+    return (
+      <Login
+        onLogin={signIn}
+        onSwitchToSignup={() => setAuthView('signup')}
+        loading={loading}
+        error={error}
+      />
+    );
+  }
+
+  const userRole: UserRole = user?.role || 'employee';
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation
         currentView={currentView}
         onNavigate={handleViewChange}
         userRole={userRole}
-        onRoleChange={setUserRole}
+        onRoleChange={() => {}} // Роль теперь определяется из профиля пользователя
+        onLogout={signOut}
+        userName={user?.name}
       />
 
       <div className="max-w-7xl mx-auto px-4 py-8">
