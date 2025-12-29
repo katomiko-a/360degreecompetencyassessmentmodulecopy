@@ -3,8 +3,6 @@
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
     "bradlc.vscode-tailwindcss",
-    "dsznajder.es7-react-js-snippets",
-    "formulahendry.auto-rename-tag",
-    "ms-vscode.vscode-typescript-next"
+    "Vue.volar"
   ]
 }
